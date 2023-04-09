@@ -9,9 +9,6 @@ Next-Hop              10.0.13.3
 Last update           3d18h
 Outbound Interface    FastEthernet0/0
 
-Для этого использовать шаблон template и подставить в него значения из строки
-ospf_route. Значения из строки ospf_route надо получить с помощью Python.
-
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 Предупреждение: в разделе 4 тесты можно легко "обмануть" сделав нужный вывод,
@@ -21,17 +18,16 @@ ospf_route. Значения из строки ospf_route надо получи�
 """
 
 ospf_route = "      10.0.24.0/24 [110/41] via 10.0.13.3, 3d18h, FastEthernet0/0"
-template = """
-Prefix                {}
-AD/Metric             {}
-Next-Hop              {}
-Last update           {}
-Outbound Interface    {}
-"""
-ospf_route_list = ospf_route.split()
-prefix = ospf_route_list[0]
-metric = ospf_route_list[1].strip('[]')
-next_hop = ospf_route_list[3].strip(',')
-last_update = ospf_route_list[4].strip(',')
-interface = ospf_route_list[5]
-print(template.format(prefix, metric, next_hop, last_update, interface))
+
+output = "\n{:25} {}" * 5
+
+route = ospf_route.replace(",", " ").replace("[", "").replace("]", "")
+route = route.split()
+
+print(output.format(
+        "Prefix", route[0],
+        "AD/Metric", route[1],
+        "Next-Hop", route[3],
+        "Last update", route[4],
+        "Outbound Interface", route[5],
+))

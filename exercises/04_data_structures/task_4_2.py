@@ -15,3 +15,6 @@
 """
 
 mac = "AAAA:BBBB:CCCC"
+
+dot_mac = mac.replace(":", ".")
+print(dot_mac)
