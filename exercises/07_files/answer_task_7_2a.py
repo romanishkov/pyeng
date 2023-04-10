@@ -19,13 +19,12 @@ from sys import argv
 
 ignore = ["duplex", "alias", "configuration"]
 
-with open(argv[1], 'r') as f:
+filename = argv[1]
+
+with open(filename) as f:
     for line in f:
-        good_line = True
-        if not line.startswith('!'):
-            for i in ignore:
-                if line.count(i):
-                    good_line = False
-            if good_line:
-                print(line.rstrip())
-        
+        words = line.split()
+        words_intersect = set(words) & set(ignore)
+        if not line.startswith("!") and not words_intersect:
+            print(line.rstrip())
+

@@ -19,12 +19,11 @@ from sys import argv
 
 ignore = ["duplex", "alias", "configuration"]
 
-with open(argv[1], 'r') as f, open(argv[2], 'w') as dest:
-    for line in f:
-        good_line = True
-        if not line.startswith('!'):
-            for i in ignore:
-                if line.count(i):
-                    good_line = False
-            if good_line:
-                dest.write(line)
+src_file, dst_file = argv[1], argv[2]
+
+with open(src_file) as src, open(dst_file, 'w') as dst:
+    for line in src:
+        words = line.split()
+        words_intersect = set(words) & set(ignore)
+        if not line.startswith("!") and not words_intersect:
+            dst.write(line)

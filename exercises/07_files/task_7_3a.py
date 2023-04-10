@@ -40,3 +40,13 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
+cam_list = []
+with open('CAM_table.txt', 'r') as f:
+    for line in f:
+        record = line.split()
+        if record and record[0].isdigit():
+            vlan, mac, _, interface = record
+            cam_list.append([int(vlan), mac, interface])
+
+for vlan, mac, interface in sorted(cam_list):
+    print('{:<9}{}{:>11}'.format(vlan, mac, interface))

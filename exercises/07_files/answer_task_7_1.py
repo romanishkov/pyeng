@@ -19,8 +19,9 @@ output = "\n{:25} {}" * 5
 
 with open("ospf.txt", "r") as f:
     for line in f:
-        route = line.replace('[','').replace(']','').replace(',','')
+        route = line.replace(",", " ").replace("[", "").replace("]", "")
         route = route.split()
+
         print(output.format(
                 "Prefix", route[1],
                 "AD/Metric", route[2],
