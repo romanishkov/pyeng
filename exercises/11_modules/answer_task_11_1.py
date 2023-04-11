@@ -43,23 +43,17 @@ def parse_cdp_neighbors(command_output):
     и с файлами и с выводом с оборудования.
     Плюс учимся работать с таким выводом.
     """
-    lines = command_output.split('\n')
-    start_parse = False
-    own_id = ''
-    cdp_dict = {}
-    for line in lines:
-        if not own_id and '>' in line:
-            own_id = line.split('>')[0]
-        elif line.startswith('Device ID'):
-            start_parse = True
-        elif line and start_parse:
-            parts = line.split()
-            own_int = parts[1] + parts[2]
-            remote_id = parts[0]
-            remote_int = parts[-2] + parts[-1]
-            cdp_dict[(own_id, own_int)] = (remote_id, remote_int)
-    return cdp_dict
-            
+    result = {}
+    for line in command_output.split("\n"):
+        line = line.strip()
+        columns = line.split()
+        if ">" in line:
+            hostname = line.split(">")[0]
+        # 3 индекс это столбец holdtime - там всегда число
+        elif len(columns) >= 5 and columns[3].isdigit():
+            r_host, l_int, l_int_num, *other, r_int, r_int_num = columns
+            result[(hostname, l_int + l_int_num)] = (r_host, r_int + r_int_num)
+    return result
 
 
 if __name__ == "__main__":

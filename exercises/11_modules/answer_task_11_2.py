@@ -29,21 +29,26 @@ Cгенерировать топологию, которая соответст�
 
 """
 from task_11_1 import parse_cdp_neighbors
-from draw_network_graph import draw_topology
+from pprint import pprint
 
-def create_network_map(filenames):
-    complete_dict = {}
-    for filename in filenames:
-        with open(filename) as f:
-            complete_dict.update(parse_cdp_neighbors(f.read()))
-    return complete_dict
-
-if __name__ == "__main__":
-    infiles = [
+infiles = [
     "sh_cdp_n_sw1.txt",
     "sh_cdp_n_r1.txt",
     "sh_cdp_n_r2.txt",
     "sh_cdp_n_r3.txt",
-    ]
-    draw_topology(create_network_map(infiles))
-    
+]
+
+
+def create_network_map(filenames):
+    network_map = {}
+
+    for filename in filenames:
+        with open(filename) as show_command:
+            parsed = parse_cdp_neighbors(show_command.read())
+            network_map.update(parsed)
+    return network_map
+
+
+if __name__ == "__main__":
+    topology = create_network_map(infiles)
+    pprint(topology)
