@@ -26,16 +26,14 @@
 """
 import re
 
-def get_ip_from_cfg(filename):
-    regex = (r'interface (?P<intf>\S+)\n'
-             r'( .*\n)*'
-             r' ip address (?P<ip>\S+) (?P<mask>\S+)'
-             )
-    result = {}
-    with open(filename) as f:
-        match = re.finditer(regex, f.read())
-        result = {m.group("intf"): m.group("ip", "mask") for m in match}
-    return result
+def get_ip_from_cfg(config):
+    with open(config) as f:
+        regex = re.compile(
+            r"interface (?P<intf>\S+)\n"
+            r"( .*\n)*"
+            r" ip address (?P<ip>\S+) (?P<mask>\S+)"
+        )
+        match = regex.finditer(f.read())
 
-if __name__ == "__main__":
-    print(get_ip_from_cfg('config_r1.txt'))
+    result = {m.group("intf"): m.group("ip", "mask") for m in match}
+    return result
