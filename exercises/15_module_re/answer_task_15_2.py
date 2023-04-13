@@ -23,12 +23,9 @@
 """
 import re
 
-def parse_sh_ip_int_br(filename):
-    regex = (r'(\S+)\s+(\S+)\s+\w+\s+\w+\s+(\w* ?up|\w* ?down)\s+(up|down)')
-    result = {}
-    with open(filename) as f:
-        match = re.findall(regex, f.read())
-    return match
 
-if __name__ == "__main__":
-    print(parse_sh_ip_int_br('sh_ip_int_br.txt'))
+def parse_sh_ip_int_br(textfile):
+    regex = r"(\S+) +(\S+) +\w+ \w+ +(administratively down|up|down) +(up|down)"
+    with open(textfile) as f:
+        result = [m.groups() for m in re.finditer(regex, f.read())]
+    return result
