@@ -44,7 +44,7 @@ def write_dhcp_snooping_to_csv(filenames, output):
             for match in re.finditer(regex, f.read()):
                 mac, ip, vlan, intf = match.group('mac', 'ip', 'vlan', 'intf')
                 data.append([switch, mac, ip, vlan, intf])
-    with open(output, 'w') as f:
+    with open(output, 'w', newline='') as f:
         writer = csv.writer(f)
         for row in data:
             writer.writerow(row)

@@ -1,2 +1,4 @@
-[console_scripts]
-pyneng = pyneng:cli
+
+        [console_scripts]
+        pyneng=pyneng:cli
+    
