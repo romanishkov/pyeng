@@ -42,16 +42,16 @@ from task_17_3 import parse_sh_cdp_neighbors
 
 
 def generate_topology_from_cdp(list_of_files, save_to_filename=None):
-    parsed_dict = {}
+    topology = {}
     for filename in list_of_files:
         with open(filename) as f:
-            parsed_dict = parsed_dict | parse_sh_cdp_neighbors(f.read())
+            topology.update(parse_sh_cdp_neighbors(f.read()))
     if save_to_filename:
-        with open(save_to_filename, "w", newline='') as dest:
-            yaml.dump(parsed_dict, dest)
-    return parsed_dict
+        with open(save_to_filename, "w") as f_out:
+            yaml.dump(topology, f_out, default_flow_style=False)
+    return topology
 
 
 if __name__ == "__main__":
-    sh_cdp_files = glob.glob("sh_cdp_n*")
-    print(generate_topology_from_cdp(sh_cdp_files, 'topology.yaml'))
+    f_list = glob.glob("sh_cdp_n_*")
+    print(generate_topology_from_cdp(f_list, save_to_filename="topology.yaml"))

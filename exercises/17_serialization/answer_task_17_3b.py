@@ -47,18 +47,19 @@ import yaml
 from draw_network_graph import draw_topology
 
 
-def transform_topology(filename):
-    with open(filename) as f:
-        input_dict = yaml.safe_load(f)
-    transf_dict = {}
-    for host1, value1 in input_dict.items():
-        for intf1, value2 in value1.items():
-            for host2, intf2 in value2.items():
-                if transf_dict.get((host2, intf2)) != (host1, intf1):
-                    transf_dict[(host1, intf1)] = (host2, intf2)
-    return transf_dict
+def transform_topology(topology_filename):
+    with open(topology_filename) as f:
+        raw_topology = yaml.safe_load(f)
+
+    formatted_topology = {}
+    for l_device, peer in raw_topology.items():
+        for l_int, remote in peer.items():
+            r_device, r_int = list(remote.items())[0]
+            if not (r_device, r_int) in formatted_topology:
+                formatted_topology[(l_device, l_int)] = (r_device, r_int)
+    return formatted_topology
 
 
 if __name__ == "__main__":
-    draw_topology(transform_topology('topology.yaml'))
-    
+    formatted_topology = transform_topology("topology.yaml")
+    draw_topology(formatted_topology)
