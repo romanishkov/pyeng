@@ -98,3 +98,39 @@ commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
 
 commands = commands_with_errors + correct_commands
+
+from pprint import pprint
+import yaml
+from netmiko import (
+    ConnectHandler,
+    NetmikoTimeoutException,
+    NetmikoAuthenticationException,
+)
+
+
+def send_config_commands(device, config_commands, log=True):
+    error_list = ['Invalid input detected', 'Incomplete command', 'Ambiguous command']
+    if log:
+        print(f'Подключаюсь к {device["host"]}...')
+    ok_result ={}
+    fail_result = {}
+    try:
+        with ConnectHandler(**device) as ssh:
+            ssh.enable()
+            for command in commands:
+                output = ssh.send_config_set(command)
+                for line in output:
+
+                ok_result[command] = output
+        return ok_result
+    except (NetmikoTimeoutException, NetmikoAuthenticationException) as error:
+        print(error)
+
+
+if __name__ == "__main__":
+#    commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+#    for dev in devices:
+#        pprint(send_config_commands(dev, commands))
+    pprint(send_config_commands(devices[0], commands))

@@ -13,20 +13,18 @@
 Для проверки измените IP-адрес на устройстве или в файле devices.yaml.
 """
 import yaml
-from netmiko import (
-    ConnectHandler,
-    NetmikoTimeoutException,
-    NetmikoAuthenticationException,
-)
+import sys
+from netmiko import ConnectHandler
+from netmiko.exceptions import SSHException
 
 
 def send_show_command(device, command):
     try:
         with ConnectHandler(**device) as ssh:
             ssh.enable()
-            output = ssh.send_command(command)
-        return output
-    except (NetmikoTimeoutException, NetmikoAuthenticationException) as error:
+            result = ssh.send_command(command)
+            return result
+    except SSHException as error:
         print(error)
 
 
@@ -34,6 +32,6 @@ if __name__ == "__main__":
     command = "sh ip int br"
     with open("devices.yaml") as f:
         devices = yaml.safe_load(f)
-
-    for dev in devices:
-        print(send_show_command(dev, command))
+    r1 = devices[0]
+    result = send_show_command(r1, command)
+    print(result)
