@@ -44,30 +44,37 @@ Out[14]: '*17:06:12.278 UTC Wed Mar 13 2019'
 In [15]: commands = ['username user5 password pass5', 'username user6 password pass6']
 
 In [16]: send_commands(r1, config=commands)
-Out[16]: 'config term\nEnter configuration commands, one per line.  End with CNTL/Z.\nR1(config)#username user5 password pass5\nR1(config)#username user6 password pass6\nR1(config)#end\nR1#'
+Out[16]: 'config term
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#username user5 password pass5
+R1(config)#username user6 password pass6
+R1(config)#end
+R1#'
 
 """
-from task_18_1b import send_show_command
-from task_18_2 import send_config_commands
 import yaml
-from pprint import pprint
+from task_18_1 import send_show_command
+from task_18_2 import send_config_commands
 
 
 commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
 command = "sh ip int br"
 
-def send_commands(device, *, show=None, config=None):
+
+def send_commands(device, *, config=None, show=None):
     if show and config:
-        raise ValueError("Нельзя подавать одновременно show и config команды")
+        raise ValueError("Можно передавать только один из аргументов show/config")
     elif show:
-        result = send_show_command(device, show)
+        return send_show_command(device, show)
     elif config:
-        result = send_config_commands(device, config)
-    return result
+        return send_config_commands(device, config)
+
 
 if __name__ == "__main__":
+    commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+    command = "sh ip int br"
     with open("devices.yaml") as f:
         devices = yaml.safe_load(f)
-#    for dev in devices:
-#        pprint(send_config_commands(dev, commands))
-    print(send_commands(devices[0], config = commands))
+    r1 = devices[0]
+    print(send_commands(r1, config=commands))
+    print(send_commands(r1, show=command))
