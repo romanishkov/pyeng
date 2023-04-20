@@ -23,30 +23,28 @@
 а затем запустить эту функцию в разных потоках для разных
 IP-адресов с помощью concurrent.futures (это надо сделать в функции ping_ip_addresses).
 """
-
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
-def ping_single(host):
-    reply = subprocess.run(['ping', '-n', '5', host], stdout=subprocess.DEVNULL)
-    if reply.returncode == 0:
-        return True
-    else:
-        return False
+
+def ping_ip(ip):
+    result = subprocess.run(["ping", "-c", "3", "-n", ip], stdout=subprocess.DEVNULL)
+    ip_is_reachable = result.returncode == 0
+    return ip_is_reachable
 
 
 def ping_ip_addresses(ip_list, limit=3):
+    reachable = []
+    unreachable = []
     with ThreadPoolExecutor(max_workers=limit) as executor:
-        ok_list = []
-        fail_list = []
-        result = executor.map(ping_single, ip_list)
-        for ip, output in zip(ip_list, result):
-            if output:
-                ok_list.append(ip)
-            else:
-                fail_list.append(ip)
-        return ok_list, fail_list
+        results = executor.map(ping_ip, ip_list)
+    for ip, status in zip(ip_list, results):
+        if status:
+            reachable.append(ip)
+        else:
+            unreachable.append(ip)
+    return reachable, unreachable
+
 
 if __name__ == "__main__":
-    ip_test_list = ['8.8.8.8', '192.168.100.150', '127.0.0.1', '192.168.100.111', '192.168.100.1', '192.168.100.123']
-    print(ping_ip_addresses(ip_test_list, 6))
+    print(ping_ip_addresses(["8.8.8.8", "192.168.100.22", "192.168.100.1"]))
