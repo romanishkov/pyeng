@@ -1,0 +1,21 @@
+vIOS1#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+vIOS1(config)#logging 10.255.255.1
+vIOS1(config)#logging buffered 20010
+vIOS1(config)#no logging console
+vIOS1(config)#end
+vIOS1#
+vIOS2#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+vIOS2(config)#logging 10.255.255.1
+vIOS2(config)#logging buffered 20010
+vIOS2(config)#no logging console
+vIOS2(config)#end
+vIOS2#
+vIOS3#configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+vIOS3(config)#logging 10.255.255.1
+vIOS3(config)#logging buffered 20010
+vIOS3(config)#no logging console
+vIOS3(config)#end
+vIOS3#

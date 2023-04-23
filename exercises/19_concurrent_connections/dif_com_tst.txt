@@ -1,0 +1,13 @@
+vIOS1#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+GigabitEthernet0/0         192.168.100.1   YES NVRAM  up                    up      
+GigabitEthernet0/1         unassigned      YES NVRAM  administratively down down    
+GigabitEthernet0/2         unassigned      YES NVRAM  administratively down down    
+GigabitEthernet0/3         unassigned      YES NVRAM  administratively down down    
+vIOS2#sh int desc
+Interface                      Status         Protocol Description
+Gi0/0                          up             up       
+Gi0/1                          admin down     down     
+Gi0/2                          admin down     down     
+Gi0/3                          admin down     down     
+vIOS3#sh run | s ^router ospf

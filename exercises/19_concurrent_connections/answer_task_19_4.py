@@ -105,49 +105,44 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
-from concurrent.futures import ThreadPoolExecutor
+from itertools import repeat
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from netmiko import ConnectHandler, NetMikoTimeoutException
 import yaml
-from netmiko import ConnectHandler
 
 
-def send_show(device_dict, command):
-    with ConnectHandler(**device_dict) as ssh:
+def send_show_command(device, command):
+    with ConnectHandler(**device) as ssh:
         ssh.enable()
-        result = ssh.find_prompt() + ssh.send_command(command, strip_command=False) + '\n'
-    return result
+        result = ssh.send_command(command)
+        prompt = ssh.find_prompt()
+    return f"{prompt}{command}\n{result}\n"
 
 
-def send_config(device_dict, command):
-    with ConnectHandler(**device_dict) as ssh:
+def send_cfg_commands(device, commands):
+    with ConnectHandler(**device) as ssh:
         ssh.enable()
-        result = ssh.find_prompt() + ssh.send_config_set(command, strip_command=False) + '\n'
-    return result
+        result = ssh.send_config_set(commands)
+    return f"{result}\n"
 
 
-def send_commands_to_devices(devices, filename, *, config=None, show=None, limit=3):
+def send_commands_to_devices(devices, filename, *, show=None, config=None, limit=3):
     if show and config:
-        raise ValueError("Нельзя подавать одновременно show и config команды")
-    else:
-        with ThreadPoolExecutor(max_workers=limit) as executor:
-            future_list = []
-            if show:
-                for device in devices:
-                    future = executor.submit(send_show, device, show)
-                    future_list.append(future)
-            elif config:
-                for device in devices:
-                    future = executor.submit(send_config, device, config)
-                    future_list.append(future)
-            with open(filename, 'w', newline='') as f:
-                for fut in future_list:
-                    f.write(fut.result())
+        raise ValueError("Можно передавать только один из аргументов show/config")
+    command = show if show else config
+    function = send_show_command if show else send_cfg_commands
+
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        futures = [executor.submit(function, device, command) for device in devices]
+        with open(filename, "w") as f:
+            for future in as_completed(futures):
+                f.write(future.result())
 
 
 if __name__ == "__main__":
-    commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
     command = "sh ip int br"
-    with open('devices.yaml') as f:
-        devices = yaml.safe_load(f)
-    send_commands_to_devices(devices, 'dif_com_tst_19.4_conf.txt', config = commands)
-    send_commands_to_devices(devices, 'dif_com_tst_19.4_show.txt', show = command)
-#    send_commands_to_devices(devices, 'dif_com_tst_19.4_show+conf.txt', config = commands, show = command)
+    with open("devices.yaml") as f:
+        devices = yaml.load(f)
+    send_commands_to_devices(devices, show=command, filename="result.txt")
+    send_commands_to_devices(devices, config="logging 10.5.5.5", filename="result.txt")
