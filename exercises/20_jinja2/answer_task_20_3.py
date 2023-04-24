@@ -5,7 +5,7 @@
 Создайте шаблон templates/ospf.txt на основе конфигурации OSPF в файле cisco_ospf.txt.
 Пример конфигурации дан, чтобы показать синтаксис.
 
-Шаблон надо создавать вручную.
+Шаблон надо создавать вручную, скопировав части конфига в соответствующий шаблон.
 
 Какие значения должны быть переменными:
 * номер процесса. Имя переменной - process
@@ -55,12 +55,29 @@ interface Fa0/1.100
 interface Fa0/1.200
  ip ospf hello-interval 1
 """
+
 import yaml
 from task_20_1 import generate_config
 
 if __name__ == "__main__":
-    data_file = "data_files/ospf.yml"
-    template_file = "templates/ospf.txt"
-    with open(data_file) as f:
-        data = yaml.safe_load(f)
-    print(generate_config(template_file, data))
+    with open("data_files/ospf.yml") as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+    print(generate_config("templates/ospf.txt", data))
+
+# templates/ospf.txt
+"""
+router ospf {{ process }}
+ router-id  {{ router_id }}
+ auto-cost reference-bandwidth {{ ref_bw }}
+{% for intf in ospf_intf %}
+ network {{ intf.ip}} 0.0.0.0 area {{ intf.area }}
+{% if intf.passive %}
+ passive-interface {{ intf.name }}
+{% endif %}
+{% endfor %}
+
+{% for intf in ospf_intf if not intf.passive %}
+interface {{ intf.name }}
+ ip ospf hello-interval 1
+{% endfor %}
+"""
