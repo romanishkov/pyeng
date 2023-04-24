@@ -21,3 +21,38 @@
 Проверить работу функции на примере вывода команды sh ip int br
 и устройствах из devices.yaml.
 """
+from textfsm import clitable
+from netmiko import (
+    ConnectHandler,
+    NetmikoTimeoutException,
+    NetmikoAuthenticationException,
+)
+import yaml
+
+
+def send_show_command(device, command):
+    try:
+        with ConnectHandler(**device) as ssh:
+            ssh.enable()
+            output = ssh.send_command(command)
+        return output
+    except (NetmikoTimeoutException, NetmikoAuthenticationException) as error:
+        print(error)
+
+def send_and_parse_show_command(
+        device_dict, command, templates_path='templates', index_file='index'):
+    attributes_dict = {"Command": command, "Vendor": device_dict["device_type"]}
+    command_output = send_show_command(device_dict, command)
+    cli_table = clitable.CliTable(index_file, templates_path)
+    cli_table.ParseCmd(command_output, attributes_dict)
+    out_list = [dict(zip(cli_table.header, row)) for row in cli_table]
+    return out_list
+
+
+# вызов функции должен выглядеть так
+if __name__ == "__main__":
+    command_test = "sh ip int br"
+    with open("devices.yaml") as f:
+        devices = yaml.safe_load(f)
+    for d in devices:
+        print(send_and_parse_show_command(d, command_test))
