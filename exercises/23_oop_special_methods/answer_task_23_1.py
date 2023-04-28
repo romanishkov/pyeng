@@ -43,28 +43,22 @@ In [6]: ip1 = IPAddress('10.1.1.1/240')
 ValueError: Incorrect mask
 
 """
-import re
+import ipaddress
 
 
 class IPAddress:
-    def __init__(self, ip_in):
-        ip_slash_mask_regexp = r'^(?P<ip_str>\S+)/(?P<mask_str>\d+)$'
-        ip_mask_search = re.search(ip_slash_mask_regexp, ip_in)
-        if ip_mask_search:
-            mask = ip_mask_search.group('mask_str')
-            ip = ip_mask_search.group('ip_str')
-            self._check_ip(ip)
-            self._check_mask(mask)
-            self.ip, self.mask = ip, int(mask)
-        else:
-            raise ValueError("Wrong format")
+    def __init__(self, ipaddress):
+        ip, mask = ipaddress.split("/")
+        self._check_ip(ip)
+        self._check_mask(mask)
+        self.ip, self.mask = ip, int(mask)
 
     def _check_ip(self, ip):
         octets = ip.split(".")
         correct_octets = [
             octet for octet in octets if octet.isdigit() and 0 <= int(octet) <= 255
         ]
-        if len(octets) == len(correct_octets) == 4:
+        if len(octets) == 4 and len(correct_octets) == 4:
             return True
         else:
             raise ValueError("Incorrect IPv4 address")
@@ -74,9 +68,3 @@ class IPAddress:
             return True
         else:
             raise ValueError("Incorrect mask")
-
-
-if __name__ == "__main__":
-    ip = IPAddress('10.1.1/26')
-    print(ip.ip)
-    print(ip.mask)

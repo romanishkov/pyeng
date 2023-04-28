@@ -3,7 +3,7 @@
 """
 Задание 23.2
 
-Скопировать класс CiscoTelnet из задания 22.2 и добавить классу поддержку
+Скопировать класс CiscoTelnet из любого задания 22.2x и добавить классу поддержку
 работы в менеджере контекста.
 При выходе из блока менеджера контекста должно закрываться соединение.
 
@@ -40,34 +40,24 @@ ValueError                                Traceback (most recent call last)
       4
 
 ValueError: Возникла ошибка
-
-Тест проверяет подключение с параметрами из файла devices.yaml. Там должны быть
-указаны доступные устройства.
 """
-import telnetlib
 import time
+import telnetlib
+import yaml
 
 
 class CiscoTelnet:
     def __init__(self, ip, username, password, secret):
-        self.ip = ip
-        self.username = username
-        self.password = password
-        self.secret = secret
         self.telnet = telnetlib.Telnet(ip)
-        self.telnet.read_until(b"Username")
+        self.telnet.read_until(b"Username:")
         self._write_line(username)
-        self.telnet.read_until(b"Password")
+        self.telnet.read_until(b"Password:")
         self._write_line(password)
-        index, m, output = self.telnet.expect([b">", b"#"])
-        if index == 0:
-            self._write_line("enable")
-            self.telnet.read_until(b"Password")
-            self._write_line(secret)
-            self.telnet.read_until(b"#", timeout=5)
-        self. _write_line("terminal length 0")
-        self. telnet.read_until(b"#", timeout=5)
-        time.sleep(3)
+        self._write_line("enable")
+        self.telnet.read_until(b"Password:")
+        self._write_line(secret)
+        self._write_line("terminal length 0")
+        time.sleep(1)
         self.telnet.read_very_eager()
 
     def _write_line(self, line):
@@ -75,20 +65,23 @@ class CiscoTelnet:
 
     def send_show_command(self, command):
         self._write_line(command)
-        return self.telnet.read_until(b"#", timeout=5).decode("ascii")
+        time.sleep(1)
+        command_output = self.telnet.read_very_eager().decode("ascii")
+        return command_output
 
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.telnet.close()
 
 
 if __name__ == "__main__":
     r1_params = {
-        'ip': '192.168.100.1',
-        'username': 'cisco',
-        'password': 'cisco',
-        'secret': 'cisco'}
+        "ip": "192.168.100.1",
+        "username": "cisco",
+        "password": "cisco",
+        "secret": "cisco",
+    }
     with CiscoTelnet(**r1_params) as r1:
-        print(r1.send_show_command('sh ip int br'))
+        print(r1.send_show_command("sh clock"))

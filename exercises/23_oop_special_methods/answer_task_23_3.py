@@ -59,6 +59,22 @@ In [10]: t2.topology
 Out[10]: {('R1', 'Eth0/4'): ('R7', 'Eth0/0'), ('R1', 'Eth0/6'): ('R9', 'Eth0/0')}
 """
 
+topology_example = {
+    ("R1", "Eth0/0"): ("SW1", "Eth0/1"),
+    ("R2", "Eth0/0"): ("SW1", "Eth0/2"),
+    ("R2", "Eth0/1"): ("SW2", "Eth0/11"),
+    ("R3", "Eth0/0"): ("SW1", "Eth0/3"),
+    ("R3", "Eth0/1"): ("R4", "Eth0/0"),
+    ("R3", "Eth0/2"): ("R5", "Eth0/0"),
+    ("SW1", "Eth0/1"): ("R1", "Eth0/0"),
+    ("SW1", "Eth0/2"): ("R2", "Eth0/0"),
+    ("SW1", "Eth0/3"): ("R3", "Eth0/0"),
+}
+
+topology_example2 = {
+    ("R1", "Eth0/4"): ("R7", "Eth0/0"),
+    ("R1", "Eth0/6"): ("R9", "Eth0/0"),
+}
 
 class Topology:
     def __init__(self, topology_dict):
@@ -67,59 +83,15 @@ class Topology:
     def _normalize(self, topology_dict):
         normalized_topology = {}
         for box, neighbor in topology_dict.items():
-            if neighbor not in normalized_topology:
+            if not neighbor in normalized_topology:
                 normalized_topology[box] = neighbor
         return normalized_topology
 
-    def delete_link(self, from_port, to_port):
-        if from_port in self.topology and self.topology[from_port] == to_port:
-            del self.topology[from_port]
-        elif to_port in self.topology and self.topology[to_port] == from_port:
-            del self.topology[to_port]
-        else:
-            print("Такого соединения нет")
+    def __add__(self, other):
+        copy_topology = self.topology.copy()
+        copy_topology.update(other.topology)
+        return Topology(copy_topology)
 
-    def delete_node(self, node):
-        original_size = len(self.topology)
-        for src, dest in list(self.topology.items()):
-            if node in src or node in dest:
-                del self.topology[src]
-        if original_size == len(self.topology):
-            print("Такого устройства нет")
-
-    def add_link(self, src, dest):
-        keys_and_values = set(self.topology.keys()) | set(self.topology.values())
-        if self.topology.get(src) == dest or self.topology.get(dest) == src:
-            print("Такое соединение существует")
-        elif src in keys_and_values or dest in keys_and_values:
-            print("Cоединение с одним из портов существует")
-        else:
-            self.topology[src] = dest
-
+    # второй вариант решения
     def __add__(self, other):
         return Topology({**self.topology, **other.topology})
-
-
-if __name__ == "__main__":
-    topology_example = {
-        ("R1", "Eth0/0"): ("SW1", "Eth0/1"),
-        ("R2", "Eth0/0"): ("SW1", "Eth0/2"),
-        ("R2", "Eth0/1"): ("SW2", "Eth0/11"),
-        ("R3", "Eth0/0"): ("SW1", "Eth0/3"),
-        ("R3", "Eth0/1"): ("R4", "Eth0/0"),
-        ("R3", "Eth0/2"): ("R5", "Eth0/0"),
-        ("SW1", "Eth0/1"): ("R1", "Eth0/0"),
-        ("SW1", "Eth0/2"): ("R2", "Eth0/0"),
-        ("SW1", "Eth0/3"): ("R3", "Eth0/0"),
-    }
-
-    topology_example2 = {
-        ("R1", "Eth0/4"): ("R7", "Eth0/0"),
-        ("R1", "Eth0/6"): ("R9", "Eth0/0"),
-    }
-    t1 = Topology(topology_example)
-    t2 = Topology(topology_example2)
-    t_sum = t1 + t2
-    print(t_sum.topology)
-
-
