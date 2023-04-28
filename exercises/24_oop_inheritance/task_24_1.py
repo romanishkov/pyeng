@@ -20,10 +20,22 @@ Out[4]: 'Interface                  IP-Address      OK? Method Status           
 
 """
 
-device_params = {
-    "device_type": "cisco_ios",
-    "ip": "192.168.100.1",
-    "username": "cisco",
-    "password": "cisco",
-    "secret": "cisco",
-}
+
+from base_connect_class import BaseSSH
+
+class CiscoSSH(BaseSSH):
+    def __init__(self, **device_params):
+        super().__init__(**device_params)
+        self.ssh.enable()
+
+if __name__ == "__main__":
+    device_params = {
+        "device_type": "cisco_ios",
+        "ip": "192.168.100.1",
+        "username": "cisco",
+        "password": "cisco",
+        "secret": "cisco",
+    }
+    ssh = CiscoSSH(**device_params)
+    print(ssh.send_show_command("sh ip int br"))
+

@@ -2,7 +2,7 @@ import sys
 
 import pytest
 from base_connect_class import BaseSSH
-from netmiko.ssh_exception import SSHException
+from netmiko.exceptions import SSHException
 
 try:
     import task_24_1a
